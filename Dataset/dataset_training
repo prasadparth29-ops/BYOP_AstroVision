@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 from torchvision.transforms import transforms
-from dataset_functions import cut_one_tile, poisson, row, read, quantization
+from Dataset.dataset_functions import cut_one_tile, poisson, row, read, quantization
 #wrote a code for saving the tiles right now but when i will write the training code, i will use the tensor for the tiles without saving them to folders. 
 Input_images=r"D:\Users\Parth\AstroVision\Dataset\Input_images"
 tiles_target="D:\Users\Parth\AstroVision\Dataset\tiles\tiles_target"
