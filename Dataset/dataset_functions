@@ -1,0 +1,50 @@
+import scipy.stats as stats
+import random
+import torch
+
+#cut tiles
+def cut_one_tile(img, tile_size=256):
+    width, height= img.size
+    max_x=width-tile_size
+    max_y=height-tile_size
+    x = random.randint(0, max_x)
+    y = random.randint(0, max_y)
+    tile=img.crop((x,y,x+tile_size,y+tile_size))
+    return tile
+#poisson
+def poisson(input_image):
+    scale=torch.empty(1).uniform_(30,120).item()
+    image=torch.clamp(input_image.to(torch.float32),min=0.0)
+    image0=image*scale
+    noisy1=torch.poisson(image0)
+    noisy1=noisy1/scale
+    noisy1=torch.clamp(noisy1, 0.0,1.0)
+    return noisy1
+#row
+def row(image):
+    c,h,w = image.shape
+    std=torch.empty(1).uniform_(0.001,0.005).item()
+    r=torch.randn(h)*std # normalised, uses std, [a,b,c], (,3)
+    r=torch.unsqueeze(r,1)# (3,1)
+    noisy3=image-r 
+    noisy3=torch.clamp(noisy3,0.0,1.0)
+    return noisy3
+#read
+def read(image):
+    lam=torch.empty(1).uniform_(0,0.25).item()
+    sigma=torch.empty(1).uniform_(0.0005,0.0025).item()
+    image_np1=image.numpy()
+    noise1=stats.tukeylambda.rvs(lam=lam, loc=0, scale=sigma, size=image.shape)
+    noisy_np1=image_np1+noise1
+    noisy2=torch.from_numpy(noisy_np1).float()
+    noisy2=torch.clamp(noisy2,0.0,1.0)
+    return noisy2
+#quantization
+def quantization(image):
+    bits=[10,11,12,12,14]
+    bit_depth=random.choice(bits)
+    q=1/(2**bit_depth -1) # quantization step
+    adc=torch.round(image/q) # ADC level and choose an integral level
+    noisy4=adc*q # back to image level
+    noisy4=torch.clamp(noisy4,0.0,1.0)
+    return noisy4
