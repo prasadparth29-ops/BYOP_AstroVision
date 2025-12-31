@@ -1,6 +1,4 @@
 #loss
-import matplotlib.pyplot as plt 
-import numpy as np
 print(list_loss)
 epoch_x=np.arange(1, len(list_loss)+1, 1)
 plt.plot(epoch_x, list_loss, label='loss')
