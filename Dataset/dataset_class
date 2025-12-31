@@ -1,0 +1,18 @@
+class AVdataset(Dataset):
+    def __init__(self, input_images, crop_size=256, transforms=None): 
+        self.input=input_images 
+        self.crop=crop_size 
+        self.imgnames=sorted(os.listdir(input_images))
+    def __len__(self):
+        return len(self.imgnames)
+
+    def __getitem__(self, index):
+        imgname=self.imgnames[index]
+        path_in= os.path.join(self.input, imgname)
+        im=Image.open(path_in).convert("RGB")#recieved error sometimes for channel number
+        target_image=cut_one_tile(im)
+        transformation1=transforms.ToTensor()
+        image0=transformation1(target_image)
+        image1=star(image0, stars=100, brightness=(150,220))
+        noisy_image=add_synthetic_noise(image1)
+        return image1, noisy_image
