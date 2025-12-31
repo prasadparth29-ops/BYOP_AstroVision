@@ -1,0 +1,24 @@
+#loss
+import matplotlib.pyplot as plt 
+import numpy as np
+print(list_loss)
+epoch_x=np.arange(1, len(list_loss)+1, 1)
+plt.plot(epoch_x, list_loss, label='loss')
+plt.axhline(best_loss, linestyle='--')
+plt.grid()
+plt.legend()
+plt.show()
+
+#psnr
+psnr_x=np.arange(1, len(list_psnr)+1, 1)
+plt.plot(psnr_x, list_psnr, label='psnr')
+plt.grid()
+plt.legend()
+plt.show()
+
+#ssim
+ssim_x=np.arange(1, len(list_ssim)+1, 1)
+plt.plot(ssim_x, list_ssim, label='ssim')
+plt.grid()
+plt.legend()
+plt.show()
