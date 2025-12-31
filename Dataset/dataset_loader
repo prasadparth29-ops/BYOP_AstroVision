@@ -1,0 +1,10 @@
+dataset_path="/kaggle/input/large-nasa-images/Input_images"
+test_path="/kaggle/input/starfield-images/Starfield_Images"
+dataset1=AVdataset(test_path)
+dataset0= AVdataset(dataset_path)
+train_dataset0, test_dataset0= random_split(dataset0, [584,146])
+train_dataset1, test_dataset1= random_split(dataset1, [96,24])
+train_dataset= train_dataset0+train_dataset1
+test_dataset=test_dataset1+test_dataset0
+train_loader= DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True)
+test_loader= DataLoader(dataset=test_dataset, batch_size=batch_size, shuffle=False)
