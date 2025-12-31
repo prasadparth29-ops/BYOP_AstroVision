@@ -1,5 +1,11 @@
-from torchmetrics.image import PeakSignalNoiseRatio, StructuralSimilarityIndexMeasure
-import random
+batch_size=10
+learning_rate=1e-5
+max_epochs=500
+
+model=Unet().to(device)
+criterion=nn.L1Loss()
+optimizer=optim.Adam(model.parameters(),lr=learning_rate)
+
 counter=0
 loss_counter=0
 best_loss = float("inf")
