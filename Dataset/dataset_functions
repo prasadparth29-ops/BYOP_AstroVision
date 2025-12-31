@@ -1,14 +1,11 @@
-import scipy.stats as stats
-import random
-import torch
-
-#cut tiles
+#cut tile
 def cut_one_tile(img, tile_size=256):
     width, height= img.size
-    max_x=width-tile_size
-    max_y=height-tile_size
-    x = random.randint(0, max_x)
-    y = random.randint(0, max_y)
+    if width < tile_size or height < tile_size:
+        img = img.resize((tile_size, tile_size))
+        return img
+    x = random.randint(0, width-tile_size)
+    y = random.randint(0, height-tile_size)
     tile=img.crop((x,y,x+tile_size,y+tile_size))
     return tile
 #poisson
@@ -23,7 +20,7 @@ def poisson(input_image):
 #row
 def row(image):
     c,h,w = image.shape
-    std=torch.empty(1).uniform_(0.001,0.005).item()
+    std=torch.empty(1).uniform_(0.0003, 0.0012).item()
     r=torch.randn(h)*std # normalised, uses std, [a,b,c], (,3)
     r=torch.unsqueeze(r,1)# (3,1)
     noisy3=image-r 
@@ -32,7 +29,7 @@ def row(image):
 #read
 def read(image):
     lam=torch.empty(1).uniform_(0,0.25).item()
-    sigma=torch.empty(1).uniform_(0.0005,0.0025).item()
+    sigma=torch.empty(1).uniform_(0.0003, 0.0015).item()
     image_np1=image.numpy()
     noise1=stats.tukeylambda.rvs(lam=lam, loc=0, scale=sigma, size=image.shape)
     noisy_np1=image_np1+noise1
@@ -48,3 +45,27 @@ def quantization(image):
     noisy4=adc*q # back to image level
     noisy4=torch.clamp(noisy4,0.0,1.0)
     return noisy4
+def add_synthetic_noise(image):
+    r = random.random()
+    if r < 0.40:
+        noisy = poisson(image)                       
+    elif r < 0.70:
+        noisy = read(poisson(image))                 
+    elif r < 0.75:
+        noisy = row(read(poisson(image)))         
+    elif r < 0.80:
+        noisy = quantization(read(poisson(image))) 
+    else:
+        noisy = image                                
+    return noisy
+
+def star(input, stars=200, brightness=(150, 200)):   
+    img = input.clone()
+    c, h, w = img.shape  
+    brightness_min = brightness[0] / 255.0
+    brightness_max = brightness[1] / 255.0 
+    x_coords = torch.randint(0, w, (stars,))
+    y_coords = torch.randint(0, h, (stars,))
+    brightnesses = torch.rand(stars) * (brightness_max - brightness_min) + brightness_min 
+    img[:, y_coords, x_coords] = brightnesses.unsqueeze(0)
+    return img
