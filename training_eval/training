@@ -1,0 +1,79 @@
+from torchmetrics.image import PeakSignalNoiseRatio, StructuralSimilarityIndexMeasure
+import random
+counter=0
+loss_counter=0
+best_loss = float("inf")
+list_psnr=[]
+list_ssim=[]
+list_loss=[]
+psnr_m = PeakSignalNoiseRatio(data_range=1.0).to(device)
+ssim_m = StructuralSimilarityIndexMeasure(data_range=1.0).to(device)
+for epoch in range(max_epochs):
+
+    #training part
+
+    model.train()
+    counter+=1
+    for index, (target, noisy) in enumerate(train_loader):
+        target=target.to(device)
+        noisy=noisy.to(device)
+        #forward
+        b,c,h,w=target.shape
+        etr = torch.empty(b).uniform_(5.0, 60.0).to(device)
+        etr=etr.view((b,1,1,1)).expand((b,1,h//16,w//16))
+        output = model(noisy, etr)
+        #loss
+        loss=criterion(output, target)
+        #backprop
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+
+    # evaluation part
+
+    model.eval()
+    loss_value=0
+    psnr=0
+    ssim=0
+    with torch.no_grad():
+        for target, noisy in test_loader:
+            
+            target=target.to(device)
+            noisy=noisy.to(device)
+            
+            b,c,h,w = target.shape
+            etr = torch.full((b,), 35).to(device)
+            etr = etr.view((b,1,1,1)).expand((b,1,h//16,w//16))
+            output = model(noisy, etr) 
+            
+            loss=criterion(output, target)
+            loss_value+=loss.item()
+            psnr+=psnr_m(output,target).item()
+            ssim+=ssim_m(output,target).item()
+            
+    batches=len(test_loader)
+    loss_value/=batches
+    list_loss.append(loss_value)
+    psnr/=batches
+    ssim/=batches
+    print(f"done with {counter} epochs and the loss was {loss_value}")
+
+    if counter%10==0:
+        list_psnr.append(psnr)
+        list_ssim.append(ssim)
+        
+    if loss_value<best_loss:
+        best_loss=loss_value
+        torch.save(model.state_dict(),f"/kaggle/working/epoch_best_loss{counter}.pth")
+
+    if len(list_loss)>=8:
+        for i in list_loss[-7:]:
+            if i>list_loss[-8]:
+                loss_counter+=1
+            else:
+                loss_counter=0
+        
+    if loss_counter >= 7:
+        print(f'caution!!!!! on {counter} epoch')
+
+print(f'best_loss={best_loss}, psnr list={list_psnr}, ssim list={list_ssim}')
