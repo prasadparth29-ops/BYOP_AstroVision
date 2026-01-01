@@ -14,7 +14,7 @@
 ## Example Outputs
 
 **Only Denoising**
-![output1](images/Denoisingq.png)
+![output1](images/Denoising1.png)
 
 **Only Constellation Marking**
 ![output2](images/constellation3.png)
