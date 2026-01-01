@@ -1,7 +1,9 @@
 # BYOP_AstroVision
 
--->AstroVision is a deep learning model that denoises low-light images mostly taken form smartphones and cameras
--->The model is based on an **Astr U-Net architecture**, which is a modified U-Net using the **LeakyReLU activations**.
+-->AstroVision is a deep learning model that denoises low-light images mostly taken form smartphones and cameras.
+
+-->The model is based on an **Astro U-Net architecture**, which is a modified U-Net using the **LeakyReLU activations**.
+
 -->The best performance was achieved at **epoch 34**.
 
 ## Loss:
